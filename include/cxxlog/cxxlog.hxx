@@ -26,7 +26,15 @@
 #define CXXLOG_LEVEL cxxlog::error
 #endif  // CXXLOG_LEVEL
 
-/// @brief Macro for optimization by short-circuit evaluation
+/// @brief Macro that checks log level
+/// @code {.cxx}
+/// if (CXXLOG_CHECK(cxxlog::info)) {
+///   /* log level is `cxxlog::info` or higher */
+/// }
+/// @endcode
+#define CXXLOG_CHECK(severity) (CXXLOG_LEVEL >= severity)
+
+/// @brief Macro that optimizes logs by short-circuit evaluation
 ///
 /// If this macro is expanded and the left side is false, the right side
 /// will not be evaluated. It will be optimized by many compilers.
@@ -43,43 +51,43 @@
 /// false && (bool)(cxxlog::Logger(cxxlog::debug) << "logger is disabled");
 /// ^^^^^^^^
 /// @endcode
-#define CXXLOG_CHECK(level) (CXXLOG_LEVEL >= level) && /* Logger */
+#define CXXLOG(severity) CXXLOG_CHECK(severity) && cxxlog::Logger(severity)
 
 /// @brief Macro for fatal log
 /// @code {.cxx}
 /// CXXLOG_F << "fatal log";
 /// @endcode
-#define CXXLOG_F CXXLOG_CHECK(cxxlog::fatal)   cxxlog::Logger(cxxlog::fatal)
+#define CXXLOG_F CXXLOG(cxxlog::fatal)
 
 /// @brief Macro for error log
 /// @code {.cxx}
 /// CXXLOG_E << "error log";
 /// @endcode
-#define CXXLOG_E CXXLOG_CHECK(cxxlog::error)   cxxlog::Logger(cxxlog::error)
+#define CXXLOG_E CXXLOG(cxxlog::error)
 
 /// @brief Macro for warning log
 /// @code {.cxx}
 /// CXXLOG_W << "warning log";
 /// @endcode
-#define CXXLOG_W CXXLOG_CHECK(cxxlog::warning) cxxlog::Logger(cxxlog::warning)
+#define CXXLOG_W CXXLOG(cxxlog::warning)
 
 /// @brief Macro for information log
 /// @code {.cxx}
 /// CXXLOG_I << "information log";
 /// @endcode
-#define CXXLOG_I CXXLOG_CHECK(cxxlog::info)    cxxlog::Logger(cxxlog::info)
+#define CXXLOG_I CXXLOG(cxxlog::info)
 
 /// @brief Macro for debug log
 /// @code {.cxx}
 /// CXXLOG_D << "debug log";
 /// @endcode
-#define CXXLOG_D CXXLOG_CHECK(cxxlog::debug)   cxxlog::Logger(cxxlog::debug)
+#define CXXLOG_D CXXLOG(cxxlog::debug)
 
 /// @brief Macro for verbose log
 /// @code {.cxx}
 /// CXXLOG_V << "verbose log";
 /// @endcode
-#define CXXLOG_V CXXLOG_CHECK(cxxlog::verbose) cxxlog::Logger(cxxlog::verbose)
+#define CXXLOG_V CXXLOG(cxxlog::verbose)
 
 /// @brief Namespace of cxxlog
 namespace cxxlog {
@@ -235,7 +243,7 @@ class Logger {
   }
 
   /// @brief boolean conversion for short-circuit evaluation
-  /// @see CXXLOG_CHECK
+  /// @see CXXLOG
   explicit operator bool() const {
     return true;
   }

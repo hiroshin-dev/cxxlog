@@ -39,6 +39,14 @@ int main() {
   CXXLOG_E(&fs) << "error log";
   CXXLOG_F(&fs) << "fatal log";
 
+  // checks log level
+  if (CXXLOG_CHECK(cxxlog::info)) {
+    CXXLOG(cxxlog::none) << "log level is info or higher";
+  }
+  if (CXXLOG_CHECK(cxxlog::debug)) {
+    CXXLOG(cxxlog::none) << "log level is debug or higher";
+  }
+
   // customize columns
   CXXLOG_E.cols() << "no columns";
   CXXLOG_E.cols(cxxlog::col::time()) << "time column only";
