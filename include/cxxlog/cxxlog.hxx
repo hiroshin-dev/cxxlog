@@ -28,11 +28,9 @@
 
 /// @brief Macro that checks log level
 /// @code {.cxx}
-/// if (CXXLOG_CHECK(cxxlog::info)) {
-///   /* log level is `cxxlog::info` or higher */
-/// }
+/// if (CXXLOG_CHECK(cxxlog::info)) { /* info or higher */ }
 /// @endcode
-#define CXXLOG_CHECK(severity) (CXXLOG_LEVEL >= severity)
+#define CXXLOG_CHECK(level) (CXXLOG_LEVEL >= level)
 
 /// @brief Macro that optimizes logs by short-circuit evaluation
 ///

@@ -69,8 +69,7 @@ set(CMAKE_CXX_STANDARD 11)
 include(FetchContent)
 FetchContent_Declare(
     cxxlog
-    GIT_REPOSITORY https://github.com/hiroshin-dev/cxxlog.git
-    GIT_TAG        main
+    URL https://github.com/hiroshin-dev/cxxlog/archive/refs/heads/main.zip
 )
 FetchContent_MakeAvailable(cxxlog)
 

@@ -40,11 +40,14 @@ int main() {
   CXXLOG_F(&fs) << "fatal log";
 
   // checks log level
+  if (CXXLOG_CHECK(cxxlog::warning)) {
+    CXXLOG(cxxlog::none) << "warning or higher";
+  }
   if (CXXLOG_CHECK(cxxlog::info)) {
-    CXXLOG(cxxlog::none) << "log level is info or higher";
+    CXXLOG(cxxlog::none) << "info or higher";
   }
   if (CXXLOG_CHECK(cxxlog::debug)) {
-    CXXLOG(cxxlog::none) << "log level is debug or higher";
+    CXXLOG(cxxlog::none) << "debug or higher";
   }
 
   // customize columns
