@@ -49,6 +49,7 @@ Output (when `CXXLOG_LEVEL=cxxlog::info`):
 
 - Header only
 - Cross platform: Linux, Windows
+- Thread safe
 
 ## Requirement
 

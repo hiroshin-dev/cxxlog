@@ -12,6 +12,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <vector>
 
@@ -167,6 +168,8 @@ void add_columns(
 
 namespace detail {
 
+std::mutex g_mutex;
+
 void add_streams(std::vector<std::ostream*> *) {
 }
 
@@ -201,6 +204,7 @@ class Logger {
     if (!streams_.empty() && (buffer_.tellp() != 0)) {
       buffer_ << std::endl;
       const auto str = buffer_.str();
+      std::lock_guard<std::mutex> lock(detail::g_mutex);
       for (auto out : streams_) {
         *out << str;
       }
