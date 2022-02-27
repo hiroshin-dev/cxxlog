@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(BUILD_EXAMPLES "build all examples" OFF)
+
 add_library(cxxlog INTERFACE)
 add_library(cxxlog::cxxlog ALIAS cxxlog)
 
@@ -20,7 +22,9 @@ target_include_directories(cxxlog INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
-add_subdirectory(examples)
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 install(TARGETS cxxlog
     EXPORT cxxlog-config

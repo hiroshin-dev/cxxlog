@@ -53,15 +53,37 @@ Output (when `CXXLOG_LEVEL=cxxlog::info`):
 
 ## Usage
 
-### Log level
+### Building with CMake
 
-The log level can be specified from cmake.
+Here's how to include cxxlog in CMake project:
 
-CMakeLists.txt
+`CMakeLists.txt`
 
 ```cmake
+cmake_minimum_required(VERSION 3.11)
+project(my_project)
+
+# cxxlog requires at least C++11
+set(CMAKE_CXX_STANDARD 11)
+
+include(FetchContent)
+FetchContent_Declare(
+    cxxlog
+    GIT_REPOSITORY https://github.com/hiroshin-dev/cxxlog.git
+    GIT_TAG        main
+)
+FetchContent_MakeAvailable(cxxlog)
+
 add_executable(example main.cxx)
 target_link_libraries(example cxxlog::cxxlog)
+target_compile_definitions(example PRIVATE CXXLOG_LEVEL=cxxlog::info)
+```
+
+#### Log level
+
+The log level can be specified by `target_compile_definitions`.
+
+```cmake
 target_compile_definitions(example PRIVATE CXXLOG_LEVEL=cxxlog::info)
 ```
 
