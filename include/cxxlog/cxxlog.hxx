@@ -165,6 +165,23 @@ void add_columns(
 
 }  // namespace col
 
+namespace detail {
+
+void add_streams(std::vector<std::ostream*> *) {
+}
+
+template<typename... OutputStreams>
+void add_streams(
+    std::vector<std::ostream*> *streams,
+    std::ostream* stream, OutputStreams &&...output_streams) {
+  if (stream != nullptr) {
+    streams->push_back(stream);
+  }
+  add_streams(streams, output_streams...);
+}
+
+}  // namespace detail
+
 /// @brief A simple logger that wraps the output stream
 class Logger {
  public:
@@ -172,8 +189,8 @@ class Logger {
   /// @param[in] severity - log severity
   explicit Logger(severity_t severity)
       : severity_(severity),
-        out_(&std::cout),
-        buf_(),
+        buffer_(),
+        streams_({ &std::cout }),
         columns_({ col::time(), col::severity() }) {
   }
 
@@ -181,13 +198,16 @@ class Logger {
   ///
   /// If data is inserted, flush it.
   ~Logger() {
-    if ((out_ != nullptr) && (buf_.tellp() != 0)) {
-      buf_ << std::endl;
-      *out_ << buf_.str();
+    if (!streams_.empty() && (buffer_.tellp() != 0)) {
+      buffer_ << std::endl;
+      const auto str = buffer_.str();
+      for (auto out : streams_) {
+        *out << str;
+      }
     }
   }
 
-  /// @brief Specifies the output stream
+  /// @brief Specifies the output streams
   ///
   /// Examples:
   /// @code {.cxx}
@@ -195,10 +215,15 @@ class Logger {
   ///
   /// std::ofstream fs("log.txt");
   /// CXXLOG_E(&fs) << "file stream";
+  ///
+  /// CXXLOG_E(&std::cerr, &fs) << "multiple outputs";
   /// @endcode
-  /// @param[in] out - output stream
-  Logger& operator()(std::ostream *out) {
-    out_ = out;
+  /// @param[in] output_streams - output streams
+  template<typename... OutputStreams>
+  Logger& operator()(OutputStreams &&...output_streams) {
+    std::vector<std::ostream*> streams;
+    detail::add_streams(&streams, output_streams...);
+    streams_.swap(streams);
     return *this;
   }
 
@@ -214,7 +239,7 @@ class Logger {
   /// @param[in] functions - column funcions
   template<typename... ColumnFunctions>
   Logger& cols(ColumnFunctions &&...functions) {
-    if (buf_.tellp() == 0) {
+    if (buffer_.tellp() == 0) {
       std::vector<col::Function> columns;
       col::detail::add_columns(&columns, functions...);
       columns_.swap(columns);
@@ -226,16 +251,16 @@ class Logger {
   /// @param[in] value - value to insert
   template<typename T>
   Logger& operator<<(const T &value) {
-    if (out_ != nullptr) {
-      if ((buf_.tellp() == 0) && !columns_.empty()) {
-        const auto flags = buf_.flags();
+    if (!streams_.empty()) {
+      if ((buffer_.tellp() == 0) && !columns_.empty()) {
+        const auto flags = buffer_.flags();
         for (const auto &column : columns_) {
-          column({ buf_, severity_ });
-          buf_.flags(flags);
-          buf_ << ' ';
+          column({ buffer_, severity_ });
+          buffer_.flags(flags);
+          buffer_ << ' ';
         }
       }
-      buf_ << value;
+      buffer_ << value;
     }
     return *this;
   }
@@ -248,8 +273,8 @@ class Logger {
 
  private:
   const severity_t severity_;
-  std::ostream *out_;
-  std::ostringstream buf_;
+  std::ostringstream buffer_;
+  std::vector<std::ostream*> streams_;
   std::vector<col::Function> columns_;
 };
 

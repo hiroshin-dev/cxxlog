@@ -21,14 +21,11 @@ int main() {
   CXXLOG_F << "fatal log. count=" << count++;
 
   // output stream: standard error
-  std::ostream* out = &std::cerr;
-  CXXLOG_E(out) << "standard error. count=" << count++;
+  CXXLOG_E(&std::cerr) << "standard error. count=" << count++;
 
   // output stream: nullptr (no output, but the expression is evaluated)
-  out = nullptr;
-  CXXLOG_I(out) << "out == nullptr. count=" << count++;
-  out = &std::cout;
-  CXXLOG_I(out) << "out != nullptr. count=" << count++;
+  CXXLOG_I(nullptr) << "stream == nullptr. count=" << count++;
+  CXXLOG_I(&std::cout) << "stream != nullptr. count=" << count++;
 
   // output stream: file stream
   std::ofstream fs("log.txt");
@@ -38,6 +35,9 @@ int main() {
   CXXLOG_W(&fs) << "warning log";
   CXXLOG_E(&fs) << "error log";
   CXXLOG_F(&fs) << "fatal log";
+
+  // output stream: multiple
+  CXXLOG_E(&std::cerr, &fs) << "multiple output streams";
 
   // checks log level
   if (CXXLOG_CHECK(cxxlog::warning)) {
@@ -62,12 +62,12 @@ int main() {
       args.out << '[' << std::hex << std::this_thread::get_id() << ']';
     }
   };
-  #define CUSTOM_LOG_I CXXLOG_I(&std::cout) \
+  #define CUSTOM_LOG_I CXXLOG_I(&std::cout, &fs) \
       .cols(cxxlog::col::time(), cxxlog::col::severity(), thread_id_column())
   CUSTOM_LOG_I << "custom extension log";
 
   // thread safe
-  std::thread thread([]{
+  std::thread thread([&fs]{
     for (int i = 0; i < 100; ++i) {
       CUSTOM_LOG_I << i;
       std::this_thread::sleep_for(std::chrono::milliseconds(1));

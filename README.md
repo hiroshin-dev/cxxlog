@@ -28,6 +28,9 @@ int main() {
   CXXLOG_E(&fs) << "error log";
   CXXLOG_F(&fs) << "fatal log";
 
+  // multiple output streams
+  CXXLOG_E(&std::cerr, &fs) << "multiple output streams";
+
   return 0;
 }
 ```
@@ -35,17 +38,17 @@ int main() {
 Output (when `CXXLOG_LEVEL=cxxlog::info`):
 
 ```none
-1645872675.011621 INFO  information log
-1645872675.011638 WARN  warning log
-1645872675.011656 ERROR error log
-1645872675.011671 FATAL fatal log
+1645976506.107683 INFO  information log
+1645976506.107705 WARN  warning log
+1645976506.107720 ERROR error log
+1645976506.107734 FATAL fatal log
+1645976506.107749 ERROR multiple output streams
 ```
 
 ## Features
 
 - Header only
 - Cross platform: Linux, Windows
-- Thread safe
 
 ## Requirement
 
