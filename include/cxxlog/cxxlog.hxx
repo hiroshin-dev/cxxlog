@@ -151,7 +151,7 @@ struct severity {
 
 namespace detail {
 
-void add_columns(std::vector<Function> *) {
+inline void add_columns(std::vector<Function> *) {
 }
 
 template<typename... ColumnFunctions>
@@ -168,9 +168,12 @@ void add_columns(
 
 namespace detail {
 
-std::mutex g_mutex;
+inline std::mutex& get_mutex() {
+  static std::mutex _mutex;
+  return _mutex;
+}
 
-void add_streams(std::vector<std::ostream*> *) {
+inline void add_streams(std::vector<std::ostream*> *) {
 }
 
 template<typename... OutputStreams>
@@ -204,7 +207,7 @@ class Logger {
     if (!streams_.empty() && (buffer_.tellp() != 0)) {
       buffer_ << std::endl;
       const auto str = buffer_.str();
-      std::lock_guard<std::mutex> lock(detail::g_mutex);
+      std::lock_guard<std::mutex> lock(detail::get_mutex());
       for (auto out : streams_) {
         *out << str;
       }
