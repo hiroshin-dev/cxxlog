@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "cxxlog/cxxlog.hxx"
+#include "advanced.hxx"
 
 int main() {
   int count = 0;
@@ -51,30 +52,21 @@ int main() {
   }
 
   // customize columns
-  CXXLOG_E.cols() << "no columns";
-  CXXLOG_E.cols(cxxlog::col::time()) << "time column only";
-  CXXLOG_E.cols(cxxlog::col::severity(), cxxlog::col::time())
-      << "multiple columns";
+  CXXLOG_E.cols() << "----------------------- no columns";
+  CXXLOG_E.cols(cxxlog::col::time()) << "----- time column only";
 
-  // custom extension
-  struct thread_id_column {
-    void operator()(const cxxlog::col::arguments &args) {
-      args.out << '[' << std::hex << std::this_thread::get_id() << ']';
-    }
-  };
-  #define CUSTOM_LOG_I CXXLOG_I(&std::cout, &fs) \
-      .cols(cxxlog::col::time(), cxxlog::col::severity(), thread_id_column())
-  CUSTOM_LOG_I << "custom extension log";
+  // advanced
+  ADVANCED_LOG_I << "advanced log";
 
   // thread safe
-  std::thread thread([&fs]{
+  std::thread thread([]{
     for (int i = 0; i < 100; ++i) {
-      CUSTOM_LOG_I << i;
+      ADVANCED_LOG_I << i;
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
   });
   for (int i = 0; i < 100; ++i) {
-    CUSTOM_LOG_I << i;
+    ADVANCED_LOG_I << i;
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
   thread.join();

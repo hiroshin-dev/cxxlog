@@ -5,7 +5,7 @@
 #
 find_package(Threads REQUIRED)
 
-add_executable(cxxlog_example main.cxx)
+add_executable(cxxlog_example main.cxx advanced.cxx)
 target_link_libraries(cxxlog_example cxxlog::cxxlog Threads::Threads)
 target_compile_definitions(cxxlog_example PRIVATE CXXLOG_LEVEL=cxxlog::info)
 if(MSVC)

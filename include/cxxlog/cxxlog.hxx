@@ -8,6 +8,7 @@
 #ifndef CXXLOG_CXXLOG_HXX_
 #define CXXLOG_CXXLOG_HXX_
 
+#include <cassert>
 #include <chrono>
 #include <functional>
 #include <iomanip>
@@ -96,17 +97,17 @@ namespace cxxlog {
 /// The log level can be specified by @ref CXXLOG_LEVEL.
 enum severity_t {
   /// @brief If set to `CXXLOG_LEVEL`, no log will be output
-  none    = 0,
+  none = 0,
   /// @brief If set to `CXXLOG_LEVEL`, only fatal logs will be output
-  fatal   = 1,
+  fatal = 1,
   /// @brief If set to `CXXLOG_LEVEL`, more than error log will be output
-  error   = 2,
+  error = 2,
   /// @brief If set to `CXXLOG_LEVEL`, more than warning log will be output
   warning = 3,
   /// @brief If set to `CXXLOG_LEVEL`, more than information log will be output
-  info    = 4,
+  info = 4,
   /// @brief If set to `CXXLOG_LEVEL`, more than debug log will be output
-  debug   = 5,
+  debug = 5,
   /// @brief If set to `CXXLOG_LEVEL`, all logs will be output
   verbose = 6,
 };
@@ -151,13 +152,14 @@ struct severity {
 
 namespace detail {
 
-inline void add_columns(std::vector<Function> *) {
+inline void add_columns(std::vector<Function>*) {
 }
 
 template<typename... ColumnFunctions>
 void add_columns(
     std::vector<Function> *columns,
     const Function &function, ColumnFunctions &&...functions) {
+  assert(function != nullptr);
   columns->push_back(function);
   add_columns(columns, functions...);
 }
@@ -173,13 +175,13 @@ inline std::mutex& get_mutex() {
   return _mutex;
 }
 
-inline void add_streams(std::vector<std::ostream*> *) {
+inline void add_streams(std::vector<std::ostream*>*) {
 }
 
 template<typename... OutputStreams>
 void add_streams(
     std::vector<std::ostream*> *streams,
-    std::ostream* stream, OutputStreams &&...output_streams) {
+    std::ostream *stream, OutputStreams &&...output_streams) {
   if (stream != nullptr) {
     streams->push_back(stream);
   }
