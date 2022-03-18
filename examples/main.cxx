@@ -3,6 +3,7 @@
 ///
 /// This software is released under the MIT License, see LICENSE.
 ///
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -22,11 +23,17 @@ int main() {
   CXXLOG_F << "fatal log. count=" << count++;
 
   // output stream: standard error
-  CXXLOG_E(&std::cerr) << "standard error. count=" << count++;
+  CXXLOG_E(std::cerr) << "standard error ref. count=" << count++;
+  CXXLOG_E(&std::cerr) << "standard error ptr. count=" << count++;
 
   // output stream: nullptr (no output, but the expression is evaluated)
-  CXXLOG_I(nullptr) << "stream == nullptr. count=" << count++;
-  CXXLOG_I(&std::cout) << "stream != nullptr. count=" << count++;
+  std::ostream* ptr = nullptr;
+  CXXLOG_I(ptr) << "stream == nullptr. count=" << count++;
+  ptr = &std::cout;
+  CXXLOG_I(ptr) << "stream != nullptr. count=" << count++;
+
+  CXXLOG_I(nullptr) << "nullptr. count=" << count++;
+  CXXLOG_I() << "default. count=" << count++;
 
   // output stream: file stream
   std::ofstream fs("log.txt");
@@ -38,7 +45,8 @@ int main() {
   CXXLOG_F(&fs) << "fatal log";
 
   // output stream: multiple
-  CXXLOG_E(&std::cerr, &fs) << "multiple output streams";
+  CXXLOG_E(std::cerr, fs) << "multiple output streams (ref)";
+  CXXLOG_E(&std::cerr, &fs) << "multiple output streams (ptr)";
 
   // checks log level
   if (CXXLOG_CHECK(cxxlog::warning)) {

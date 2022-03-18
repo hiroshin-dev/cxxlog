@@ -13,7 +13,7 @@
 #include "cxxlog/cxxlog.hxx"
 
 #define ADVANCED_LOG_I \
-  CXXLOG_I(&std::cout, Singleton::get_instance().get_stream()) \
+  CXXLOG_I(std::cout, Singleton::get_instance().get_stream()) \
     .cols(cxxlog::col::time(), cxxlog::col::severity(), thread_id_column())
 
 class Singleton {
@@ -25,7 +25,7 @@ class Singleton {
   Singleton(Singleton&&) = delete;
   Singleton& operator=(Singleton&&) = delete;
 
-  std::ostream* get_stream();
+  std::ostream& get_stream();
 
  private:
   Singleton();

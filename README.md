@@ -29,7 +29,8 @@ int main() {
   CXXLOG_F(&fs) << "fatal log";
 
   // multiple output streams
-  CXXLOG_E(&std::cerr, &fs) << "multiple output streams";
+  CXXLOG_E(std::cerr, fs) << "multiple output streams (ref)";
+  CXXLOG_E(&std::cerr, &fs) << "multiple output streams (ptr)";
 
   return 0;
 }
@@ -38,11 +39,12 @@ int main() {
 Output (when `CXXLOG_LEVEL=cxxlog::info`):
 
 ```none
-1645976506.107683 INFO  information log
-1645976506.107705 WARN  warning log
-1645976506.107720 ERROR error log
-1645976506.107734 FATAL fatal log
-1645976506.107749 ERROR multiple output streams
+1647540198.640983 INFO  information log
+1647540198.641005 WARN  warning log
+1647540198.641022 ERROR error log
+1647540198.641037 FATAL fatal log
+1647540198.641053 ERROR multiple output streams (ref)
+1647540198.641093 ERROR multiple output streams (ptr)
 ```
 
 ## Features

@@ -19,6 +19,6 @@ Singleton::~Singleton() {
   CXXLOG_I << "Singleton.dtor";
 }
 
-std::ostream* Singleton::get_stream() {
-  return &stream_;
+std::ostream& Singleton::get_stream() {
+  return stream_;
 }

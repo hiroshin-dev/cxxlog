@@ -8,8 +8,8 @@
 #ifndef CXXLOG_CXXLOG_HXX_
 #define CXXLOG_CXXLOG_HXX_
 
-#include <cassert>
 #include <chrono>
+#include <cstddef>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -150,22 +150,6 @@ struct severity {
   }
 };
 
-namespace detail {
-
-inline void add_columns(std::vector<Function>*) {
-}
-
-template<typename... ColumnFunctions>
-void add_columns(
-    std::vector<Function> *columns,
-    const Function &function, ColumnFunctions &&...functions) {
-  assert(function != nullptr);
-  columns->push_back(function);
-  add_columns(columns, functions...);
-}
-
-}  // namespace detail
-
 }  // namespace col
 
 namespace detail {
@@ -178,14 +162,26 @@ inline std::mutex& get_mutex() {
 inline void add_streams(std::vector<std::ostream*>*) {
 }
 
-template<typename... OutputStreams>
+template<typename Stream, typename... Args>
 void add_streams(
-    std::vector<std::ostream*> *streams,
-    std::ostream *stream, OutputStreams &&...output_streams) {
+    std::vector<std::ostream*> *streams, Stream &&stream, Args &&...args) {
+  streams->push_back(&stream);
+  add_streams(streams, std::forward<Args>(args)...);
+}
+
+template<typename Stream, typename... Args>
+void add_streams(
+    std::vector<std::ostream*> *streams, Stream *stream, Args &&...args) {
   if (stream != nullptr) {
     streams->push_back(stream);
   }
-  add_streams(streams, output_streams...);
+  add_streams(streams, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void add_streams(
+    std::vector<std::ostream*> *streams, std::nullptr_t, Args &&...args) {
+  add_streams(streams, std::forward<Args>(args)...);
 }
 
 }  // namespace detail
@@ -220,19 +216,25 @@ class Logger {
   ///
   /// Examples:
   /// @code {.cxx}
-  /// CXXLOG_E(&std::cerr) << "standard error";
+  /// CXXLOG_E(std::cerr) << "standard error ref";
+  /// CXXLOG_E(&std::cerr) << "standard error ptr";
   ///
   /// std::ofstream fs("log.txt");
   /// CXXLOG_E(&fs) << "file stream";
   ///
-  /// CXXLOG_E(&std::cerr, &fs) << "multiple outputs";
+  /// CXXLOG_E(std::cerr, fs) << "multiple outputs";
   /// @endcode
   /// @param[in] output_streams - output streams
   template<typename... OutputStreams>
   Logger& operator()(OutputStreams &&...output_streams) {
     std::vector<std::ostream*> streams;
-    detail::add_streams(&streams, output_streams...);
+    detail::add_streams(
+        &streams, std::forward<OutputStreams>(output_streams)...);
     streams_.swap(streams);
+    return *this;
+  }
+
+  Logger& operator()() {
     return *this;
   }
 
@@ -249,8 +251,7 @@ class Logger {
   template<typename... ColumnFunctions>
   Logger& cols(ColumnFunctions &&...functions) {
     if (buffer_.tellp() == 0) {
-      std::vector<col::Function> columns;
-      col::detail::add_columns(&columns, functions...);
+      std::vector<col::Function> columns { functions... };
       columns_.swap(columns);
     }
     return *this;
@@ -259,7 +260,7 @@ class Logger {
   /// @brief Inserts data into the output stream
   /// @param[in] value - value to insert
   template<typename T>
-  Logger& operator<<(const T &value) {
+  Logger& operator<<(T &&value) {
     if (!streams_.empty()) {
       if ((buffer_.tellp() == 0) && !columns_.empty()) {
         const auto flags = buffer_.flags();
@@ -269,7 +270,7 @@ class Logger {
           buffer_ << ' ';
         }
       }
-      buffer_ << value;
+      buffer_ << std::forward<T>(value);
     }
     return *this;
   }
