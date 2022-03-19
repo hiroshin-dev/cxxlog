@@ -159,28 +159,30 @@ inline std::mutex& get_mutex() {
   return _mutex;
 }
 
+template<typename T>
+T* to_ptr(T &obj) {
+  return &obj;
+}
+
+template<typename T>
+T* to_ptr(T *obj) {
+  return obj;
+}
+
+inline std::nullptr_t to_ptr(std::nullptr_t) {
+  return nullptr;
+}
+
 inline void add_streams(std::vector<std::ostream*>*) {
 }
 
 template<typename Stream, typename... Args>
 void add_streams(
     std::vector<std::ostream*> *streams, Stream &&stream, Args &&...args) {
-  streams->push_back(&stream);
-  add_streams(streams, std::forward<Args>(args)...);
-}
-
-template<typename Stream, typename... Args>
-void add_streams(
-    std::vector<std::ostream*> *streams, Stream *stream, Args &&...args) {
-  if (stream != nullptr) {
-    streams->push_back(stream);
+  auto stream_ptr = to_ptr(std::forward<Stream>(stream));
+  if (stream_ptr != nullptr) {
+    streams->push_back(stream_ptr);
   }
-  add_streams(streams, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-void add_streams(
-    std::vector<std::ostream*> *streams, std::nullptr_t, Args &&...args) {
   add_streams(streams, std::forward<Args>(args)...);
 }
 

@@ -47,6 +47,7 @@ int main() {
   // output stream: multiple
   CXXLOG_E(std::cerr, fs) << "multiple output streams (ref)";
   CXXLOG_E(&std::cerr, &fs) << "multiple output streams (ptr)";
+  CXXLOG_E(std::cerr, &fs) << "multiple output streams (mix)";
 
   // checks log level
   if (CXXLOG_CHECK(cxxlog::warning)) {
